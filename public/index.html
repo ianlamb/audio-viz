@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <title>Audio Visualizer</title>
+
+        <style>
+            html, body {
+                position: relative;
+                height: 100%;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+
+            audio {
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 100;
+            }
+
+            .container {
+                position: relative;
+            }
+
+            .bar-container {
+                position: relative;
+                float: left;
+                margin-right: 1px;
+                height: 100%;
+                background: #ccc;
+            }
+
+            .bar {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: deepskyblue;
+                transition: height .1s;
+            }
+        </style>
+    </head>
+    <body>
+        <audio id="myAudio" controls>
+            <source src="track.mp3" type="audio/mpeg" />
+        </audio>
+
+        <div class="container"></div>
+
+        <script>
+            var FFT_SIZE = 256
+            var TRIM_AMOUNT = 12
+
+            function generateBars(numBars) {
+                var container = document.querySelector('.container')
+                for (var i = 0; i < numBars; i++) {
+                    var barContainer = document.createElement('div')
+                    barContainer.classList.add('bar-container')
+                    barContainer.style.width = container.clientWidth / numBars - 1 + 'px'
+
+                    var barNode = document.createElement('div')
+                    barNode.classList.add('bar')
+                    barNode.id = 'bar-' + i
+
+                    barContainer.appendChild(barNode)
+                    container.appendChild(barContainer)
+                }
+            }
+
+            window.onload = function() {
+                var audioCtx = new AudioContext()
+                var myAudio = document.getElementById('myAudio')
+                var audioSrc = audioCtx.createMediaElementSource(myAudio)
+                var analyser = audioCtx.createAnalyser()
+                var gainNode = audioCtx.createGain()
+                audioSrc.connect(gainNode)
+                gainNode.connect(audioCtx.destination)
+
+                analyser.fftSize = FFT_SIZE
+
+                audioSrc.connect(analyser)
+
+                generateBars(analyser.frequencyBinCount - TRIM_AMOUNT * 2);
+
+                var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+                function renderFrame() {
+                    requestAnimationFrame(renderFrame)
+
+                    analyser.getByteFrequencyData(frequencyData)
+                    vizData = frequencyData.slice(TRIM_AMOUNT, frequencyData.length - TRIM_AMOUNT)
+
+                    // console.log('length: %s, maxVal: %s, minVal: %s', frequencyData.length, frequencyData[0], frequencyData[frequencyData.length - 1])
+                    vizData.forEach(function(data, i) {
+                        var barNode = document.getElementById('bar-' + i)
+                        if (barNode) {
+                            barNode.style.height = data / 255 * 100 + '%'
+                        }
+                    })
+                }
+
+                setTimeout(function() {
+                    myAudio.play()
+                    renderFrame()
+                }, 1000)
+            };
+        </script>
+    </body>
+</html>

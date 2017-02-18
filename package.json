@@ -1,0 +1,20 @@
+{
+  "name": "audio-viz",
+  "version": "1.0.0",
+  "description": "Audio visualizer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianlamb/audio-viz.git"
+  },
+  "author": "Ian Lamb",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ianlamb/audio-viz/issues"
+  },
+  "homepage": "https://github.com/ianlamb/audio-viz#readme"
+}
